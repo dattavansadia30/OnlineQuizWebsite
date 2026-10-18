@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Progress | QuizBloom</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="progress-page">
+
+    <nav class="navbar">
+        <a href="index.html" class="logo">Quiz<span>Bloom</span></a>
+
+        <div class="progress-nav">
+            <a href="categories.html">Take Quiz</a>
+            <a href="index.html">Home</a>
+        </div>
+    </nav>
+
+    <main class="progress-container">
+
+        <section class="progress-heading">
+            <p class="progress-label">YOUR LEARNING JOURNEY ✨</p>
+            <h1>My Progress</h1>
+            <p>Every quiz is a step towards learning something new.</p>
+        </section>
+
+        <section class="progress-stats">
+
+            <div class="progress-stat">
+                <div class="progress-icon">📝</div>
+                <p>Total Quizzes</p>
+                <h2 id="totalQuizzes">0</h2>
+            </div>
+
+            <div class="progress-stat">
+                <div class="progress-icon">📈</div>
+                <p>Average Score</p>
+                <h2 id="averageScore">0%</h2>
+            </div>
+
+            <div class="progress-stat">
+                <div class="progress-icon">🏆</div>
+                <p>Best Score</p>
+                <h2 id="bestScore">0%</h2>
+            </div>
+
+        </section>
+
+        <section class="progress-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Quiz History</h2>
+                    <p>Review your previous attempts below.</p>
+                </div>
+
+                <button id="clearHistoryBtn" class="clear-history-btn"
+                    type="button">
+                    Clear History
+                </button>
+            </div>
+
+            <div id="historyContainer"></div>
+        </section>
+
+        <section class="progress-cta">
+            <div>
+                <h2>Ready for another challenge? 💗</h2>
+                <p>Choose a category and keep improving your score.</p>
+            </div>
+
+            <a href="categories.html" class="progress-cta-btn">
+                Take a Quiz →
+            </a>
+        </section>
+
+    </main>
+
+    <script>
+        function loadProgress() {
+            const history = JSON.parse(
+                localStorage.getItem("quizHistory") || "[]"
+            );
+
+            const historyContainer =
+                document.getElementById("historyContainer");
+
+            historyContainer.innerHTML = "";
+
+            document.getElementById("totalQuizzes").textContent =
+                history.length;
+
+            if (history.length === 0) {
+                document.getElementById("averageScore").textContent = "0%";
+                document.getElementById("bestScore").textContent = "0%";
+
+                const emptyMessage = document.createElement("div");
+                emptyMessage.className = "empty-history";
+
+                const icon = document.createElement("div");
+                icon.textContent = "🌷";
+                icon.className = "empty-icon";
+
+                const heading = document.createElement("h3");
+                heading.textContent = "No quizzes yet";
+
+                const message = document.createElement("p");
+                message.textContent =
+                    "Your quiz attempts will appear here after you complete a quiz.";
+
+                emptyMessage.appendChild(icon);
+                emptyMessage.appendChild(heading);
+                emptyMessage.appendChild(message);
+
+                historyContainer.appendChild(emptyMessage);
+                return;
+            }
+
+            let totalPercentage = 0;
+            let best = 0;
+
+            history.forEach(function(attempt) {
+                totalPercentage += attempt.percentage;
+
+                if (attempt.percentage > best) {
+                    best = attempt.percentage;
+                }
+            });
+
+            const average = Math.round(totalPercentage / history.length);
+
+            document.getElementById("averageScore").textContent =
+                average + "%";
+
+            document.getElementById("bestScore").textContent =
+                best + "%";
+
+            // Show newest attempts first.
+            const newestFirst = history.slice().reverse();
+
+            newestFirst.forEach(function(attempt, index) {
+                const card = document.createElement("div");
+                card.className = "history-card";
+
+                const details = document.createElement("div");
+                details.className = "history-details";
+
+                const category = document.createElement("h3");
+                category.textContent = attempt.category || "Quiz";
+
+                const date = document.createElement("p");
+                date.textContent = attempt.date || "Date unavailable";
+
+                details.appendChild(category);
+                details.appendChild(date);
+
+                const scoreArea = document.createElement("div");
+                scoreArea.className = "history-score-area";
+
+                const score = document.createElement("strong");
+                score.textContent =
+                    attempt.score + "/" + attempt.total;
+
+                const percentage = document.createElement("span");
+                percentage.textContent = attempt.percentage + "%";
+
+                scoreArea.appendChild(score);
+                scoreArea.appendChild(percentage);
+
+                const barBackground = document.createElement("div");
+                barBackground.className = "history-bar-background";
+
+                const bar = document.createElement("div");
+                bar.className = "history-bar";
+                bar.style.width =
+                    Math.max(0, Math.min(100, attempt.percentage)) + "%";
+
+                barBackground.appendChild(bar);
+
+                card.appendChild(details);
+                card.appendChild(scoreArea);
+                card.appendChild(barBackground);
+
+                historyContainer.appendChild(card);
+            });
+        }
+
+        document.getElementById("clearHistoryBtn")
+            .addEventListener("click", function() {
+
+                const confirmClear = confirm(
+                    "Are you sure you want to delete all quiz history?"
+                );
+
+                if (confirmClear) {
+                    localStorage.removeItem("quizHistory");
+                    loadProgress();
+                }
+            });
+
+        loadProgress();
+    </script>
+
+</body>
+</html>

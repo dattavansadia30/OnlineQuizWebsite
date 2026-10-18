@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Results | QuizBloom</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="results-page">
+
+    <nav class="navbar">
+        <a href="index.html" class="logo">Quiz<span>Bloom</span></a>
+        <a href="categories.html" class="quiz-exit">Categories</a>
+    </nav>
+
+    <main class="results-container">
+
+        <section class="result-hero">
+            <div class="result-emoji" id="resultEmoji">🎉</div>
+            <p class="result-label">QUIZ COMPLETED</p>
+            <h1 id="resultHeading">Great Job!</h1>
+            <p id="resultMessage">Here is how you performed.</p>
+
+            <div class="score-circle">
+                <div>
+                    <h2 id="score">0/5</h2>
+                    <p>Your Score</p>
+                </div>
+            </div>
+
+            <h3 id="percentage">0%</h3>
+            <p id="categoryName">Programming Quiz</p>
+        </section>
+
+        <section class="result-stats">
+            <div class="result-stat correct-stat">
+                <span>✅</span>
+                <h2 id="correctCount">0</h2>
+                <p>Correct Answers</p>
+            </div>
+
+            <div class="result-stat wrong-stat">
+                <span>❌</span>
+                <h2 id="wrongCount">0</h2>
+                <p>Wrong / Skipped</p>
+            </div>
+
+            <div class="result-stat total-stat">
+                <span>📝</span>
+                <h2 id="totalCount">5</h2>
+                <p>Total Questions</p>
+            </div>
+        </section>
+
+        <div class="result-actions">
+            <button class="primary-btn" onclick="retryQuiz()">
+                ↻ Try Again
+            </button>
+
+            <a href="categories.html" class="result-link">
+                Explore Categories
+            </a>
+        </div>
+
+        <section class="review-section">
+            <h2>Answer Review 📚</h2>
+            <p class="review-subtitle">
+                Check your answers and learn from your mistakes.
+            </p>
+
+            <div id="reviewContainer"></div>
+        </section>
+
+    </main>
+
+    <script>
+        const result = JSON.parse(
+            localStorage.getItem("lastQuizResult") || "null"
+        );
+
+        const reviewContainer = document.getElementById("reviewContainer");
+
+        if (!result) {
+            document.getElementById("resultHeading").textContent =
+                "No Results Found";
+
+            document.getElementById("resultMessage").textContent =
+                "Please complete a quiz first.";
+
+            document.getElementById("resultEmoji").textContent = "📚";
+            document.getElementById("score").textContent = "—";
+            document.getElementById("percentage").textContent = "—";
+            document.getElementById("categoryName").textContent = "";
+
+            reviewContainer.textContent = "Your quiz results will appear here.";
+
+        } else {
+            const correct = result.score;
+            const total = result.total;
+            const wrong = total - correct;
+
+            document.getElementById("score").textContent =
+                correct + "/" + total;
+
+            document.getElementById("percentage").textContent =
+                result.percentage + "%";
+
+            document.getElementById("categoryName").textContent =
+                result.category + " Quiz";
+
+            document.getElementById("correctCount").textContent = correct;
+            document.getElementById("wrongCount").textContent = wrong;
+            document.getElementById("totalCount").textContent = total;
+
+            if (result.percentage === 100) {
+                document.getElementById("resultHeading").textContent =
+                    "Perfect Score!";
+
+                document.getElementById("resultMessage").textContent =
+                    "Amazing! You answered every question correctly.";
+
+                document.getElementById("resultEmoji").textContent = "🏆";
+
+            } else if (result.percentage >= 60) {
+                document.getElementById("resultHeading").textContent =
+                    "Great Job!";
+
+                document.getElementById("resultMessage").textContent =
+                    "Well done! Keep practising to improve even more.";
+
+                document.getElementById("resultEmoji").textContent = "🎉";
+
+            } else {
+                document.getElementById("resultHeading").textContent =
+                    "Keep Practising!";
+
+                document.getElementById("resultMessage").textContent =
+                    "Every attempt helps you learn. Try again!";
+
+                document.getElementById("resultEmoji").textContent = "🌱";
+            }
+
+            result.answers.forEach(function(item, index) {
+                const card = document.createElement("div");
+                card.className = "review-card";
+
+                const heading = document.createElement("h3");
+                heading.textContent =
+                    "Q" + (index + 1) + ". " + item.question;
+
+                const yourAnswer = document.createElement("p");
+                const correctAnswer = document.createElement("p");
+
+                const isCorrect = item.selectedIndex === item.correctIndex;
+
+                yourAnswer.textContent = "Your answer: " +
+                    (item.selectedIndex === null
+                        ? "Not answered"
+                        : item.options[item.selectedIndex]);
+
+                yourAnswer.className = isCorrect
+                    ? "review-correct"
+                    : "review-wrong";
+
+                correctAnswer.textContent =
+                    "Correct answer: " + item.options[item.correctIndex];
+
+                correctAnswer.className = "review-correct";
+
+                const status = document.createElement("span");
+                status.className = isCorrect
+                    ? "review-status status-correct"
+                    : "review-status status-wrong";
+
+                status.textContent = isCorrect
+                    ? "Correct ✓"
+                    : "Incorrect ✗";
+
+                card.appendChild(heading);
+                card.appendChild(status);
+                card.appendChild(yourAnswer);
+                card.appendChild(correctAnswer);
+
+                reviewContainer.appendChild(card);
+            });
+        }
+
+        function retryQuiz() {
+            window.location.href = "instructions.html?category=" +
+                encodeURIComponent(
+                    result ? result.category : "Programming"
+                );
+        }
+    </script>
+
+</body>
+</html>
